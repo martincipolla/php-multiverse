@@ -1,0 +1,11 @@
+# Ignorar todo dentro de las carpetas src
+php*/src/*
+
+# Pero mantener los index.php
+!php*/src/index.php
+
+# Ignorar archivos y carpetas comunes
+.DS_Store
+.idea/
+.vscode/
+*.log

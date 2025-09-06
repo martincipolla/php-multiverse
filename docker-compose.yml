@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  php56:
+    build: ./php56
+    container_name: php56_apache
+    volumes:
+      - ./php56/src:/var/www/html
+    ports:
+      - "8056:80"
+    networks:
+      - devnet
+
+  php74:
+    build: ./php74
+    container_name: php74_apache
+    volumes:
+      - ./php74/src:/var/www/html
+    ports:
+      - "8074:80"
+    networks:
+      - devnet
+
+  php84:
+    build: ./php84
+    container_name: php84_apache
+    volumes:
+      - ./php84/src:/var/www/html
+    ports:
+      - "8084:80"
+    networks:
+      - devnet
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql57
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306" # Puerto alternativo en Windows
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - devnet
+
+  mongo:
+    image: mongo:6
+    container_name: mongo6
+    restart: always
+    ports:
+      - "27018:27017" # Puerto alternativo en Windows
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - devnet
+
+volumes:
+  mysql_data:
+  mongo_data:
+
+networks:
+  devnet:
+    driver: bridge
