@@ -78,17 +78,20 @@ Comparto esta solución esperando que pueda ayudar a otros desarrolladores que s
 ### Credenciales por Defecto
 
 **MySQL:**
+
 - Host: localhost:3307
 - Usuario: root
 - Contraseña: root
 
 **MongoDB:**
+
 - Host: localhost:27018
 - Sin autenticación por defecto
 
 ### Ejemplos de Conexión
 
 **MySQL desde PHP:**
+
 ```php
 $mysqli = new mysqli('mysql', 'root', 'root', 'database');
 // O usando PDO
@@ -96,6 +99,7 @@ $pdo = new PDO('mysql:host=mysql;dbname=database', 'root', 'root');
 ```
 
 **MongoDB desde PHP:**
+
 ```php
 $mongo = new MongoDB\Client('mongodb://mongo:27017');
 ```
@@ -105,6 +109,7 @@ $mongo = new MongoDB\Client('mongodb://mongo:27017');
 ### Agregar Extensiones PHP
 
 Modifica el Dockerfile correspondiente agregando la extensión deseada:
+
 ```dockerfile
 RUN docker-php-ext-install nombre_extension
 ```
@@ -112,6 +117,7 @@ RUN docker-php-ext-install nombre_extension
 ### Modificar Configuración PHP
 
 Agrega archivos .ini en la carpeta conf.d:
+
 ```dockerfile
 COPY mi-config.ini /usr/local/etc/php/conf.d/
 ```
@@ -119,21 +125,27 @@ COPY mi-config.ini /usr/local/etc/php/conf.d/
 ## Solución de Problemas
 
 ### Puertos en Uso
+
 Si encuentras errores de puertos en uso, puedes modificar los puertos en `docker-compose.yml`:
+
 ```yaml
 ports:
   - "nuevo_puerto:puerto_contenedor"
 ```
 
 ### Permisos de Archivos
+
 Si encuentras problemas de permisos:
+
 ```bash
 # En el host
 chmod -R 777 ./php*/src
 ```
 
 ### Logs de Contenedores
+
 Para ver logs en tiempo real:
+
 ```bash
 docker-compose logs -f [servicio]
 ```
@@ -141,11 +153,13 @@ docker-compose logs -f [servicio]
 ## Detener el Entorno
 
 Para detener todos los contenedores:
+
 ```bash
 docker-compose down
 ```
 
 Para detener y eliminar volúmenes:
+
 ```bash
 docker-compose down -v
 ```
@@ -155,12 +169,14 @@ docker-compose down -v
 Puedes agregar fácilmente soporte para otras versiones de PHP siguiendo estos pasos:
 
 1. Crea una nueva carpeta para tu versión:
+
 ```bash
 mkdir php73
 mkdir php73/src
 ```
 
 2. Crea un nuevo Dockerfile (ejemplo para PHP 7.3):
+
 ```dockerfile
 FROM php:7.3-apache
 
@@ -184,25 +200,42 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 ```
 
 3. Agrega el servicio en docker-compose.yml:
+
 ```yaml
-  php73:
-    build: ./php73
-    container_name: php73_apache
-    volumes:
-      - ./php73/src:/var/www/html
-    ports:
-      - "8073:80"
-    networks:
-      - devnet
+php73:
+  build: ./php73
+  container_name: php73_apache
+  volumes:
+    - ./php73/src:/var/www/html
+  ports:
+    - "8073:80"
+  networks:
+    - devnet
 ```
 
 4. Reconstruye los contenedores:
+
 ```bash
 docker-compose build php73
 docker-compose up -d
 ```
 
 Puedes seguir este mismo patrón para cualquier versión de PHP soportada por la [imagen oficial de PHP en Docker Hub](https://hub.docker.com/_/php).
+
+## Desarrollo con Vite
+
+Los contenedores incluyen soporte para desarrollo con Vite (Node.js y npm). Los puertos están configurados de la siguiente manera:
+
+- PHP 8.4: puerto 5173 (estándar de Vite)
+- PHP 7.4: puerto 5174
+- PHP 5.6: puerto 5156
+
+```bash
+docker exec -it php84_apache bash  # o php74_apache/php56_apache
+cd /var/www/html/[proyecto]
+npm install
+npm run dev
+```
 
 ## Contribuir
 
