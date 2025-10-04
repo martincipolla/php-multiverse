@@ -237,6 +237,155 @@ npm install
 npm run dev
 ```
 
+## Optimización de Performance
+
+### Problema en Windows
+
+En Windows, los bind mounts desde `C:\...` hacia contenedores Docker tienen un overhead significativo de I/O. Laravel toca cientos de archivos en cada request (autoloader, views, cache), lo que puede causar tiempos de carga de varios segundos.
+
+### Optimizaciones Implementadas
+
+Este proyecto incluye varias optimizaciones para mejorar la performance en desarrollo:
+
+#### 1. OPcache Configurado
+
+Cada versión de PHP tiene OPcache habilitado con configuración optimizada para desarrollo:
+
+- **Cachea bytecode PHP** compilado (reduce parsing)
+- **Revalidación instantánea** (`revalidate_freq=0`) - detecta cambios al instante
+- **JIT habilitado en PHP 8.4** para máxima performance
+
+#### 2. Realpath Cache
+
+Configuración de `realpath_cache` para reducir llamadas al filesystem:
+
+```ini
+realpath_cache_size=4096K
+realpath_cache_ttl=600
+```
+
+#### 3. Volúmenes con Flag `cached`
+
+Los volúmenes en `docker-compose.yml` usan el flag `:cached` para mejorar I/O en Windows:
+
+```yaml
+volumes:
+  - ./php84/src:/var/www/html:cached
+```
+
+### Scripts de Optimización para Laravel
+
+#### Optimizar un Proyecto
+
+Para proyectos Laravel, usa el script de optimización que cachea autoloader, config, routes y views:
+
+**PowerShell (Windows):**
+
+```powershell
+.\optimize-laravel.ps1 php84 nombre-proyecto
+```
+
+**Bash (Git Bash/WSL):**
+
+```bash
+./optimize-laravel.sh php84 nombre-proyecto
+```
+
+**Ejemplo:**
+
+```powershell
+.\optimize-laravel.ps1 php84 boilerplate
+```
+
+Esto ejecuta:
+
+- `composer dump-autoload -o` - Optimiza autoloader
+- `php artisan config:cache` - Cachea configuración
+- `php artisan route:cache` - Cachea rutas
+- `php artisan view:cache` - Cachea vistas Blade
+
+#### Limpiar Caches
+
+Si haces cambios en config, rutas o necesitas limpiar caches:
+
+**PowerShell:**
+
+```powershell
+.\clear-laravel-cache.ps1 php84 nombre-proyecto
+```
+
+**Manualmente:**
+
+```bash
+docker exec -it php84_apache bash
+cd /var/www/html/nombre-proyecto
+php artisan optimize:clear
+```
+
+### Comandos Útiles de Performance
+
+#### Ver uso de recursos del contenedor
+
+```bash
+docker stats php84_apache
+```
+
+#### Verificar configuración de OPcache
+
+```bash
+docker exec -it php84_apache php -i | grep opcache
+```
+
+#### Verificar realpath cache
+
+```bash
+docker exec -it php84_apache php -i | grep realpath
+```
+
+### Mejora Esperada
+
+Con las optimizaciones implementadas:
+
+- **OPcache + realpath_cache:** 30-50% más rápido
+- **Volúmenes cached:** 10-20% adicional
+- **Optimizaciones Laravel:** 20-40% adicional (primera carga)
+
+**Total estimado:** 2-3x más rápido en recargas de página
+
+### Máxima Performance (Recomendado)
+
+Para obtener la mejor performance posible en Windows:
+
+#### Opción A: Mover proyecto a WSL2
+
+1. Instala WSL2 (Ubuntu recomendado)
+2. Mueve el proyecto a: `\\wsl$\Ubuntu\home\<usuario>\dev\php-multiverse`
+3. Ejecuta `docker-compose` desde WSL
+
+Beneficio: **5-10x más rápido** que bind mounts desde `C:\`
+
+#### Opción B: Activar VirtioFS en Docker Desktop
+
+1. Docker Desktop → Settings → General
+2. Activa "Use the new Virtualization framework"
+3. Reinicia Docker Desktop
+
+Beneficio: **2-4x más rápido** que bind mounts tradicionales
+
+### Troubleshooting
+
+#### Los cambios no se reflejan
+
+Si los cambios en código no se reflejan:
+
+```bash
+# Limpiar caches de Laravel
+docker exec -it php84_apache php artisan optimize:clear
+
+# Verificar que OPcache revalida archivos
+docker exec -it php84_apache php -r "echo opcache_get_status()['opcache_statistics']['num_cached_scripts'];"
+```
+
 ## Contribuir
 
 Las contribuciones son bienvenidas. Por favor, siéntete libre de:

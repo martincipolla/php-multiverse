@@ -5,7 +5,7 @@ services:
     build: ./php56
     container_name: php56_apache
     volumes:
-      - ./php56/src:/var/www/html
+      - ./php56/src:/var/www/html:cached
     ports:
       - "8056:80"
       - "5156:5173"  # Puerto Vite
@@ -16,7 +16,7 @@ services:
     build: ./php74
     container_name: php74_apache
     volumes:
-      - ./php74/src:/var/www/html
+      - ./php74/src:/var/www/html:cached
     ports:
       - "8074:80"
       - "5174:5173"  # Puerto Vite
@@ -27,7 +27,7 @@ services:
     build: ./php84
     container_name: php84_apache
     volumes:
-      - ./php84/src:/var/www/html
+      - ./php84/src:/var/www/html:cached
     ports:
       - "8084:80"
       - "5173:5173"  # Puerto Vite
