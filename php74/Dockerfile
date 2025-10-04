@@ -22,6 +22,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 RUN a2enmod rewrite
 RUN echo "date.timezone=America/Argentina/Buenos_Aires" > /usr/local/etc/php/conf.d/timezone.ini
 
+# Copy performance configuration files
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY php-performance.ini /usr/local/etc/php/conf.d/php-performance.ini
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

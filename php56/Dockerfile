@@ -25,6 +25,10 @@ RUN curl -fsSL https://nodejs.org/dist/v14.21.3/node-v14.21.3-linux-x64.tar.gz |
 RUN a2enmod rewrite
 RUN echo "date.timezone=America/Argentina/Buenos_Aires" > /usr/local/etc/php/conf.d/timezone.ini
 
+# Copy performance configuration files
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY php-performance.ini /usr/local/etc/php/conf.d/php-performance.ini
+
 # Install Composer 1.x (last version supporting PHP 5.6)
 COPY --from=composer:1 /usr/bin/composer /usr/bin/composer
 
